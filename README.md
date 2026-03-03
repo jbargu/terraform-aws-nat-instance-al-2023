@@ -1,6 +1,6 @@
-# terraform-aws-nat-instance [![CircleCI](https://circleci.com/gh/int128/terraform-aws-nat-instance.svg?style=shield)](https://circleci.com/gh/int128/terraform-aws-nat-instance)
+# terraform-aws-nat-instance-al-2023
 
-This is a Terraform module which provisions a NAT instance.
+This is a Terraform module which provisions a NAT instance. Based on [int128 NAT module](https://github.com/int128/terraform-aws-nat-instance) with [Amazon Linux 2023 patch](https://github.com/int128/terraform-aws-nat-instance/issues/65) and working reboot.
 
 Features:
 
@@ -33,13 +33,22 @@ module "vpc" {
 }
 
 module "nat" {
-  source = "int128/nat-instance/aws"
+  source = "jbargu/nat-instance-al-2023/aws"
 
-  name                        = "main"
+  name                        = "${var.project}-${var.environment}"
   vpc_id                      = module.vpc.vpc_id
   public_subnet               = module.vpc.public_subnets[0]
   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   private_route_table_ids     = module.vpc.private_route_table_ids
+
+  # Optional for naming
+  project     = var.project
+  environment = var.environment
+
+  tags = merge(
+    var.tags,
+    { "Name" = "${var.project}-${var.environment}-nat-instance" }
+  )
 }
 
 resource "aws_eip" "nat" {

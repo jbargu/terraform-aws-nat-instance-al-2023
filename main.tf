@@ -38,7 +38,7 @@ resource "aws_route" "this" {
   network_interface_id   = aws_network_interface.this.id
 }
 
-# AMI of the latest Amazon Linux 2 
+# AMI of the latest Amazon Linux 2023
 data "aws_ami" "this" {
   most_recent = true
   owners      = ["amazon"]
@@ -52,15 +52,11 @@ data "aws_ami" "this" {
   }
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*"]
+    values = ["al2023-ami-2023*"]
   }
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
-  }
-  filter {
-    name   = "block-device-mapping.volume-type"
-    values = ["gp2"]
   }
 }
 
@@ -193,19 +189,20 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 
 resource "aws_iam_role_policy" "eni" {
   role        = aws_iam_role.this.name
-  name_prefix = var.name
+  name_prefix = "${var.project}-${var.environment}-nat-eni"
   policy      = <<EOF
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:AttachNetworkInterface"
-            ],
-            "Resource": "*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": [
+              "ec2:AttachNetworkInterface",
+              "ec2:ModifyInstanceAttribute"
+          ],
+          "Resource": "*"
+      }
+  ]
 }
 EOF
 }

@@ -54,10 +54,26 @@ variable "key_name" {
   default     = ""
 }
 
+variable "project" {
+  type        = string
+  default     = "nat-instance"
+  description = "Project name (for reusability)"
+}
+
+variable "environment" {
+  type        = string
+  default     = "staging"
+  description = "Deployment environment (dev/staging/prod)"
+}
+
 variable "tags" {
-  description = "Tags applied to resources created with this module"
+  description = "Tags to be applied to resources"
   type        = map(string)
-  default     = {}
+  default = {
+    Project     = "nat-instance"
+    Environment = "staging"
+    Terraform   = "true"
+  }
 }
 
 variable "user_data_write_files" {
@@ -73,8 +89,6 @@ variable "user_data_runcmd" {
 }
 
 locals {
-  // Merge the default tags and user-specified tags.
-  // User-specified tags take precedence over the default.
   common_tags = merge(
     {
       Name = "nat-instance-${var.name}"
